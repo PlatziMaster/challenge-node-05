@@ -2,10 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
-const { config } = require('../config');
+require('dotenv').config();
 
-const dbUrl = `mongodb+srv://${config.dbUser}:${config.dbPassword}@${config.dbHost}/${config.dbName}?retryWrites=true&w=majority`;
-const PORT = config.port;
+const dbUrl = process.env.BD_URL;
+const PORT = process.env.PORT;
 let db;
 
 app.use(bodyParser.json());
@@ -37,5 +37,5 @@ app.post('/addquote', (request, response) => {
 });
 
 app.listen(PORT, function () {
-  console.log(`Servidor funcionando http://localhost:${PORT}`)
+  console.log('Servidor funcionando http://localhost:3000')
 });
