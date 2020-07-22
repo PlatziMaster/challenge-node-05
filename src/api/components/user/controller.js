@@ -1,36 +1,35 @@
-const nanoid = require('nanoid');
+const MongoLib = require('../../../store/mongo');
 
-const COLLECTION = 'user';
-
-module.exports = function(injectedStore){
-    let store = injectedStore;
-    if(!store){
-        store = require('../../../store/dummy');
+class usersService{
+    constructor(){
+        this.collection = 'users';
+        this.mongoDB = new MongoLib();
     }
-    
-    function list() {
-        return store.list(COLLECTION);
-    }
-
-    function get(id) {
-        return store.get(COLLECTION, id);
+    async getUsers() {
+        const users = await this.mongoDB.getAll(this.collection);
+        console.log(users);
+        return users || [];
     }
 
-    function upsert(body){
-        const user = {
-            name: body.name
-        }
-        if(body.id){
-            user.id = body.id;
-        }else {
-            user.id = nanoid();
-        }
-        return store.upsert(COLLECTION, user);
+    async getUser({ userId }){
+        const user = await this.mongoDB.get( this.collection, userId); 
+        return user || {};
     }
 
-    return {
-        list,
-        get,
-        upsert
+    async createUser({ user }){
+        const createUserId = await this.mongoDB.create(this.collection, user);
+        return createUserId;
+    }
+
+    async updateUser({ userId , user } = {} ){
+        const updateUserId = await this.mongoDB.update(this.collection, userId, user);
+        return updateUserId;
+    }
+
+    async deleteUser({ userId}){
+        const deleteUserId = await this.mongoDB.delete(this.collection, userId);
+        return deleteUserId;
     }
 }
+
+module.exports = usersService;

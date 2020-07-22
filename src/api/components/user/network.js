@@ -1,45 +1,45 @@
 const express = require('express');
 const response = require('../../../network/response');
-const controller = require('./index');
+const controller = require('./controller');
 
 const router = express.Router();
-
+const userService = new controller();
 //Routes
 router.get('/', list);
 router.get('/:id', get);
-router.post('/', upsert);
-router.put('/', upsert);
+router.post('/', post);
 
-function list(req, res){
-    controller.list()
-        .then((lista) => {
-            response.success(req, res, lista, 200);
-        })
-        .catch((err) => {
-            response.error(req, res, err.message, 500);
-        });
+async function list(req, res, next){
+    try{
+        const users = await userService.getUsers();
+        response.success(req, res, users, 200);
+    }catch(error){
+        next(error)
+    }
     
 };
 
-function get(req,res){
-    controller.get(req.params.id)
-        .then((user) => {
-            response.success(req, res, user, 200);
-        })
-        .catch((err) => {
-            response.error(req, res, err.message, 500);
-        })
+async function get(req,res, next){
+    try{
+        const { userId } = req.params.id;
+        const user = await userService.getUser(userId);
+        response.success(req, res, user, 200);
+    }catch(error){
+        next(error)
+    }
 }
 
-function upsert(req, res) {
-    Controller.upsert(req.body)
-        .then((user) => {
-            response.success(req, res, user, 201);
-        })
-        .catch((err) => {
-            response.error(req, res, err.message, 500);
+async function post(req, res, next){
+    const { body: user } = req; 
+    try {
+        const createdUserId = await userService.createUser({user})
+        res.status(201).json({
+            data: createdUserId,
+            message: 'User Created'
         });
-    
-}
+    } catch (error) {
+        next(error);
+    }
+};
 
 module.exports = router;
